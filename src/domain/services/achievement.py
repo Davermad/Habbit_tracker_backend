@@ -16,7 +16,7 @@ class AchievementService:
         habit: Habit,
         rewards: list[Reward],
         achievement_date: date
-    ) -> list[Reward]:
+        ) -> list[Reward]:
         """
         Calculate new rewards achieved based on the habit's current streak.
         :param habit: The habit entity.

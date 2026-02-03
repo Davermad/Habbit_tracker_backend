@@ -6,6 +6,7 @@ from datetime import timedelta, date
 
 from src.domain.exceptions import HabitIsAlreadyCompletedException
 from src.domain.events.habit_completed import HabitCompletedEvent
+from src.domain.events.streak_broken import StreakBrokenEvent
 from src.domain.value_objects.streak import Streak
 
 class Habit:
@@ -14,7 +15,7 @@ class Habit:
     """
     
     def __init__(
-        self, id: UUID, user_id: UUID, name: str, description: str, current_streak: Streak, date_created: date, date_of_last_completion: date = None
+        self, id: UUID, user_id: UUID, name: str, description: str, current_streak: Streak, date_created: date, date_of_last_completion: date = None, achieved_rewards_ids: list[UUID] = None
         ):
         self.id = id
         self.user_id = user_id
@@ -23,6 +24,7 @@ class Habit:
         self.current_streak = current_streak
         self.date_created = date_created
         self.date_of_last_completion = date_of_last_completion
+        self.achieved_rewards_ids = achieved_rewards_ids or []
         self.events = []
         
     def is_habit_completed_today(self, today_date: date) -> bool:
@@ -58,6 +60,11 @@ class Habit:
         if self.check_streak_status(completion_date):
             self.current_streak.reset()
             self.current_streak.increment()
+            self.events.append(StreakBrokenEvent(
+                habit_id=self.id,
+                user_id=self.user_id,
+                broken_date=completion_date
+            ))
         else:
             self.current_streak.increment()
         
